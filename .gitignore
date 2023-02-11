@@ -1,6 +1,7 @@
 # Config file
 config.ini
 access_token
+.idea
 
 # Logs
 *.log
