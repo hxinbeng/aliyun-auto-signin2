@@ -9,10 +9,12 @@ import logging
 from os import environ
 from time import mktime, time
 from datetime import datetime
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 from configobj import ConfigObj
 import requests
+
+import dingtalk
 
 
 def update_access_token(refresh_token: str) -> bool | dict:
@@ -64,8 +66,9 @@ def sign_in(access_token: str) -> bool:
         json={},
     ).json()
 
-    if not data['success']:
+    if 'success' not in data:
         logging.error(f'签到失败, 错误信息: {data}')
+        push(data)
         return False
 
     current_day = None
@@ -77,6 +80,41 @@ def sign_in(access_token: str) -> bool:
     reward = '无奖励' if not current_day['reward'] else f'获得{current_day["notice"]}'
     logging.info(f'签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
     logging.info(f'本次签到 {reward}')
+
+    push(reward, data['result']['signInCount'])
+
+    return True
+
+
+def push(signin_result: Optional[str] = None, signin_count: Optional[int] = None) -> bool:
+    """
+    签到消息推送
+
+    :param signin_result: 签到结果
+    :param signin_count: 签到天数
+    :return:
+    """
+    config = ConfigObj('config.ini')
+
+    # 推送
+    if not (
+            config['dingtalk_app_key']
+            and config['dingtalk_app_secret']
+            and config['dingtalk_user_id']
+    ):
+        return False
+
+    try:
+        bot = dingtalk.Bot(config['dingtalk_app_key'], config['dingtalk_app_secret'])
+        bot.send(
+            [config['dingtalk_user_id']],
+            f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
+            if signin_result and signin_count
+            else f'签到失败: {signin_result}'
+        )
+    except Exception as e:
+        logging.error(f'推送失败, 错误信息: {e}')
+        return False
 
     return True
 
