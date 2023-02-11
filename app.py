@@ -15,6 +15,7 @@ from configobj import ConfigObj
 import requests
 
 import dingtalk
+import serverchan
 
 
 def update_access_token(refresh_token: str) -> bool | dict:
@@ -24,18 +25,15 @@ def update_access_token(refresh_token: str) -> bool | dict:
     :param refresh_token: refresh_token
     :return: 更新成功返回字典, 失败返回 False
     """
-    data = requests.post(
-        'https://auth.aliyundrive.com/v2/account/token',
-        json={
-            'grant_type': 'refresh_token',
-            'refresh_token': refresh_token,
-        }
-    ).json()
+    data = requests.post('https://auth.aliyundrive.com/v2/account/token',
+                         json={
+                             'grant_type': 'refresh_token',
+                             'refresh_token': refresh_token,
+                         }).json()
 
     try:
         if data['code'] in [
-            'RefreshTokenExpired',
-            'InvalidParameter.RefreshToken'
+                'RefreshTokenExpired', 'InvalidParameter.RefreshToken'
         ]:
             logging.error(f'更新 access_token 失败, 错误信息: {data}')
             return False
@@ -47,7 +45,8 @@ def update_access_token(refresh_token: str) -> bool | dict:
     return {
         'access_token': data['access_token'],
         'refresh_token': data['refresh_token'],
-        'expired_at': int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000
+        'expired_at':
+        int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000
     }
 
 
@@ -77,7 +76,8 @@ def sign_in(access_token: str) -> bool:
             current_day = data['result']['signInLogs'][i - 1]
             break
 
-    reward = '无奖励' if not current_day['reward'] else f'获得{current_day["notice"]}'
+    reward = '无奖励' if not current_day[
+        'reward'] else f'获得{current_day["notice"]}'
     logging.info(f'签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
     logging.info(f'本次签到 {reward}')
 
@@ -86,7 +86,25 @@ def sign_in(access_token: str) -> bool:
     return True
 
 
-def push(signin_result: Optional[str] = None, signin_count: Optional[int] = None) -> bool:
+def push(signin_result: Optional[str] = None,
+                  signin_count: Optional[int] = None) -> bool:
+    config = ConfigObj('config.ini')
+
+    dingtalk = False
+    serverchan = False
+
+    # 推送F
+    if (config['dingtalk_app_key'] and config['dingtalk_app_secret']
+            and config['dingtalk_user_id']):
+        dingtalk = push_dingtalk(signin_result, signin_count)
+
+    if (config['serverchan_sendkey']):
+        serverchan = push_serverchan(signin_result, signin_count)
+
+    return dingtalk or serverchan
+
+
+def push_dingtalk(signin_result: Optional[str], signin_count: Optional[int]) -> bool:
     """
     签到消息推送
 
@@ -95,23 +113,34 @@ def push(signin_result: Optional[str] = None, signin_count: Optional[int] = None
     :return:
     """
     config = ConfigObj('config.ini')
-
-    # 推送
-    if not (
-            config['dingtalk_app_key']
-            and config['dingtalk_app_secret']
-            and config['dingtalk_user_id']
-    ):
+    try:
+        bot = dingtalk.Bot(config['dingtalk_app_key'],
+                           config['dingtalk_app_secret'])
+        bot.send([config['dingtalk_user_id']],
+                 f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}' if
+                 signin_result and signin_count else f'签到失败: {signin_result}')
+    except Exception as e:
+        logging.error(f'推送失败, 错误信息: {e}')
         return False
 
+    return True
+
+
+def push_serverchan(signin_result: Optional[str] = None,
+                    signin_count: Optional[int] = None) -> bool:
+    """
+    签到消息推送
+
+    :param signin_result: 签到结果
+    :param signin_count: 签到天数
+    :return:
+    """
+    config = ConfigObj('config.ini')
     try:
-        bot = dingtalk.Bot(config['dingtalk_app_key'], config['dingtalk_app_secret'])
+        bot = serverchan.Bot(config['serverchan_sendkey'])
         bot.send(
-            [config['dingtalk_user_id']],
-            f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
-            if signin_result and signin_count
-            else f'签到失败: {signin_result}'
-        )
+            '阿里云盘自动签到', f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
+            if signin_result and signin_count else f'签到失败: {signin_result}')
     except Exception as e:
         logging.error(f'推送失败, 错误信息: {e}')
         return False
@@ -127,7 +156,8 @@ def init_logger() -> NoReturn:
     """
     log = logging.getLogger()
     log.setLevel(logging.INFO)
-    log_format = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s')
+    log_format = logging.Formatter(
+        '%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s')
 
     # Console
     ch = logging.StreamHandler()
@@ -185,7 +215,8 @@ def main():
     config = ConfigObj('config.ini')  # 获取配置文件
 
     # 检查 access token 有效性
-    if int(config['expired_at']) < int(time() * 1000) or not get_access_token():
+    if int(config['expired_at']) < int(
+            time() * 1000) or not get_access_token():
         logging.info('access_token 已过期, 正在更新...')
         data = update_access_token(config['refresh_token'])
         if not data:
