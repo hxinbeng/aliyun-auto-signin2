@@ -14,6 +14,8 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
 
 ## 使用方法
 
+注意: main 分支仅支持 Python 3.10 及以上版本, 低于 3.10 的版本请移步 [低版本兼容分支](https://github.com/ImYrS/aliyun-auto-signin/tree/older-python-version)
+
 1. Clone 本项目到本地或下载 Release 版本
 2. 环境安装
     1. `Python >= 3.10`
