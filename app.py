@@ -9,13 +9,13 @@ import logging
 from os import environ
 from time import mktime, time
 from datetime import datetime
-from typing import NoReturn
+from typing import NoReturn, Any
 
 from configobj import ConfigObj
 import requests
 
 
-def update_access_token(refresh_token: str) -> bool | dict:
+def update_access_token(refresh_token: str) -> Any:
     """
     使用 refresh_token 更新 access_token
 
@@ -105,7 +105,7 @@ def init_logger() -> NoReturn:
     log.addHandler(fh)
 
 
-def get_access_token() -> str | None:
+def get_access_token() -> Any:
     """
     从本地文件获取 access_token
 
