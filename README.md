@@ -16,7 +16,7 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
 
 1. Clone 本项目到本地或下载 Release 版本
 2. 环境安装
-    1. `Python >= 3.10`
+    1. `Python >= 3.6` (未经确认)
     2. 安装依赖
         ```bash
         pip install configobj requests
