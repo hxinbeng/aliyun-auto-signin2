@@ -22,7 +22,7 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
         pip install configobj requests
         ```
 3. 修改配置文件
-    1. 复制 `example.config` 为 `config.ini`
+    1. 复制 `example.config.ini` 为 `config.ini`
     2. 在配置文件中填入你的阿里云盘 `refresh token`
 4. 运行并查看是否成功签到
     ```bash
