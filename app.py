@@ -92,7 +92,7 @@ def sign_in(access_token: str) -> bool:
 def push(
         signin_result: Optional[str] = None,
         signin_count: Optional[int] = None,
-) -> bool:
+) -> NoReturn:
     """
     推送签到结果
 
@@ -102,62 +102,14 @@ def push(
     """
     config = ConfigObj('config.ini')
 
-    dingtalk = False
-    serverchan = False
+    configured_push_types = [i.strip() for i in config['push_types']]
 
-    # 推送F
-    if (config['dingtalk_app_key'] and config['dingtalk_app_secret']
-            and config['dingtalk_user_id']):
-        dingtalk = push_dingtalk(signin_result, signin_count)
-
-    if (config['serverchan_sendkey']):
-        serverchan = push_serverchan(signin_result, signin_count)
-
-    return dingtalk or serverchan
-
-
-def push_dingtalk(signin_result: Optional[str], signin_count: Optional[int]) -> bool:
-    """
-    签到消息推送
-
-    :param signin_result: 签到结果
-    :param signin_count: 签到天数
-    :return:
-    """
-    config = ConfigObj('config.ini')
-    try:
-        bot = dingtalk.Bot(config['dingtalk_app_key'],
-                           config['dingtalk_app_secret'])
-        bot.send([config['dingtalk_user_id']],
-                 f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}' if
-                 signin_result and signin_count else f'签到失败: {signin_result}')
-    except Exception as e:
-        logging.error(f'推送失败, 错误信息: {e}')
-        return False
-
-    return True
-
-
-def push_serverchan(signin_result: Optional[str] = None,
-                    signin_count: Optional[int] = None) -> bool:
-    """
-    签到消息推送
-
-    :param signin_result: 签到结果
-    :param signin_count: 签到天数
-    :return:
-    """
-    config = ConfigObj('config.ini')
-    try:
-        bot = serverchan.Bot(config['serverchan_sendkey'])
-        bot.send(
-            '阿里云盘自动签到', f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
-            if signin_result and signin_count else f'签到失败: {signin_result}')
-    except Exception as e:
-        logging.error(f'推送失败, 错误信息: {e}')
-        return False
-
-    return True
+    for push_type, pusher in {
+        'dingtalk': dingtalk,
+        'serverchan': serverchan,
+    }.items():
+        if push_type in configured_push_types:
+            pusher.push(signin_result, signin_count, config)
 
 
 def init_logger() -> NoReturn:
