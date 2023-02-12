@@ -100,7 +100,7 @@ def push(
     :param signin_count: 当月累计签到天数
     :return:
     """
-    config = ConfigObj('config.ini')
+    config = ConfigObj('config.ini', encoding='UTF8')
 
     configured_push_types = [i.strip() for i in config['push_types']]
 
@@ -121,7 +121,8 @@ def init_logger() -> NoReturn:
     log = logging.getLogger()
     log.setLevel(logging.INFO)
     log_format = logging.Formatter(
-        '%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s')
+        '%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s'
+    )
 
     # Console
     ch = logging.StreamHandler()
@@ -176,11 +177,13 @@ def main():
 
     init_logger()  # 初始化日志系统
 
-    config = ConfigObj('config.ini')  # 获取配置文件
+    config = ConfigObj('config.ini', encoding='UTF8')  # 获取配置文件
 
     # 检查 access token 有效性
-    if int(config['expired_at']) < int(
-            time() * 1000) or not get_access_token():
+    if (
+            int(config['expired_at']) < int(time() * 1000)
+            or not get_access_token()
+    ):
         logging.info('access_token 已过期, 正在更新...')
         data = update_access_token(config['refresh_token'])
         if not data:
