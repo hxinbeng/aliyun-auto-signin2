@@ -102,7 +102,14 @@ def push(
     """
     config = ConfigObj('config.ini', encoding='UTF8')
 
-    configured_push_types = [i.strip() for i in config['push_types']]
+    configured_push_types = [
+        i.strip()
+        for i in (
+            [config['push_types']]
+            if type(config['push_types']) == str
+            else config['push_types']
+        )
+    ]
 
     for push_type, pusher in {
         'dingtalk': dingtalk,
