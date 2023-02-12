@@ -14,8 +14,7 @@ from typing import NoReturn, Optional
 from configobj import ConfigObj
 import requests
 
-import dingtalk
-import serverchan
+from modules import dingtalk, serverchan
 
 
 def update_access_token(refresh_token: str) -> bool | dict:
@@ -25,15 +24,17 @@ def update_access_token(refresh_token: str) -> bool | dict:
     :param refresh_token: refresh_token
     :return: 更新成功返回字典, 失败返回 False
     """
-    data = requests.post('https://auth.aliyundrive.com/v2/account/token',
-                         json={
-                             'grant_type': 'refresh_token',
-                             'refresh_token': refresh_token,
-                         }).json()
+    data = requests.post(
+        'https://auth.aliyundrive.com/v2/account/token',
+        json={
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token,
+        }
+    ).json()
 
     try:
         if data['code'] in [
-                'RefreshTokenExpired', 'InvalidParameter.RefreshToken'
+            'RefreshTokenExpired', 'InvalidParameter.RefreshToken',
         ]:
             logging.error(f'更新 access_token 失败, 错误信息: {data}')
             return False
@@ -45,8 +46,7 @@ def update_access_token(refresh_token: str) -> bool | dict:
     return {
         'access_token': data['access_token'],
         'refresh_token': data['refresh_token'],
-        'expired_at':
-        int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000
+        'expired_at': int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000,
     }
 
 
@@ -76,8 +76,11 @@ def sign_in(access_token: str) -> bool:
             current_day = data['result']['signInLogs'][i - 1]
             break
 
-    reward = '无奖励' if not current_day[
-        'reward'] else f'获得{current_day["notice"]}'
+    reward = (
+        '无奖励'
+        if not current_day['reward']
+        else f'获得{current_day["notice"]}'
+    )
     logging.info(f'签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
     logging.info(f'本次签到 {reward}')
 
@@ -86,8 +89,17 @@ def sign_in(access_token: str) -> bool:
     return True
 
 
-def push(signin_result: Optional[str] = None,
-                  signin_count: Optional[int] = None) -> bool:
+def push(
+        signin_result: Optional[str] = None,
+        signin_count: Optional[int] = None,
+) -> bool:
+    """
+    推送签到结果
+
+    :param signin_result: 签到结果
+    :param signin_count: 当月累计签到天数
+    :return:
+    """
     config = ConfigObj('config.ini')
 
     dingtalk = False
