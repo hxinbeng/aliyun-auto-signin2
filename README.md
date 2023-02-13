@@ -39,16 +39,25 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
 ## 推送渠道
 
 - 钉钉机器人
-  - 填写 `appKey`, `appSecret` 和 `userId`
-  - 参考 [钉钉机器人开发文档](https://open.dingtalk.com/document/isvapp/send-messages-based-on-enterprise-robot-callback)
+    - `app_key`: 机器人的 `appKey`
+    - `app_secret`: 机器人的 `appSecret`
+    - `user_id`: 接收消息的用户 `id`, 必须是钉钉 `userid`
+    - [钉钉机器人开发w文档](https://open.dingtalk.com/document/isvapp/send-messages-based-on-enterprise-robot-callback)
 
-- server酱
-  - 填写 `sendkey`
-  - 参考 [server酱官方文档](https://sct.ftqq.com)
+- ServerChan
+    - `sendkey`: ServerChan 发送消息的鉴权 `key`
+    - [server酱官方文档](https://sct.ftqq.com)
 
 - PushDeer (未测试)
-  - 填写 `endpoint` 和 `pushkey`, 非自建服务器使用默认 `endpoint`
-  - 参考 [PushDeer Github](https://github.com/easychen/pushdeer)
+    - `endpoint`: 默认为 `https://api2.pushdeer.com`, 自建 PushDeer Server 时才需要更改
+    - [PushDeer on GitHub](https://github.com/easychen/pushdeer)
+
+- Telegram Bot
+    - `endpoint`: 默认为 `https://api.telegram.org/bot`, 自建 Bot Server 时才需要更改
+    - `bot_token`: 机器人的 `token`, 从 Bot Father 处获取
+    - `chat_id`: 发送签到消息的用户 `id`, 或 Channel 的 `@username`
+    - `proxy`: 代理地址, 例如 `http://127.0.0.1:1080`, 支持 `HTTP` 和 `SOCKS5` 代理, 不使用代理请留空
+    - [Telegram Bot API](https://core.telegram.org/bots/api)
 
 - 欢迎 PR 更多推送渠道
 
