@@ -39,6 +39,7 @@ class Pusher:
             json={
                 'chat_id': self.chat_id,
                 'text': f'*{title}*\n\n{content}',
+                'parse_mode': 'MarkdownV2',
             },
             proxies={
                 'http': self.proxy,
@@ -84,7 +85,7 @@ def push(
         )
         pusher.send(
             '阿里云盘自动签到',
-            f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
+            f'签到成功: 本月累计签到 {signin_count} 天\\. 本次签到 {signin_result}'
             if signin_result and signin_count
             else f'签到失败: {signin_result}',
         )
