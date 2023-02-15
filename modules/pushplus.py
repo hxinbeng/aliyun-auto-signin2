@@ -9,7 +9,7 @@ class Pusher:
     def __init__(
             self,
             token: str
-	):
+    ):
         self.token = token
 
     def send(self, title: str, content: str) -> dict:
@@ -28,6 +28,8 @@ class Pusher:
                 'content': content,
             }
         ).json()
+
+
 def push(
         signin_result: Optional[str],
         signin_count: Optional[int],

@@ -78,8 +78,8 @@ def sign_in(access_token: str) -> bool:
 
     reward = (
         '无奖励'
-        if not current_day['reward']
-        else f'获得{current_day["notice"]}'
+        if not current_day['isReward']
+        else f'获得 {current_day["reward"]["name"]} {current_day["reward"]["description"]}'
     )
     logging.info(f'签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
     logging.info(f'本次签到 {reward}')
