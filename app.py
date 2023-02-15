@@ -9,10 +9,12 @@ import logging
 from os import environ
 from time import mktime, time
 from datetime import datetime
-from typing import NoReturn, Any
+from typing import NoReturn, Optional, Any
 
 from configobj import ConfigObj
 import requests
+
+from modules import dingtalk, serverchan, pushdeer, telegram, pushplus
 
 
 def update_access_token(refresh_token: str) -> Any:
@@ -45,7 +47,7 @@ def update_access_token(refresh_token: str) -> Any:
     return {
         'access_token': data['access_token'],
         'refresh_token': data['refresh_token'],
-        'expired_at': int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000
+        'expired_at': int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000,
     }
 
 
@@ -64,8 +66,9 @@ def sign_in(access_token: str) -> bool:
         json={},
     ).json()
 
-    if not data['success']:
+    if 'success' not in data:
         logging.error(f'签到失败, 错误信息: {data}')
+        push(data)
         return False
 
     current_day = None
@@ -74,11 +77,50 @@ def sign_in(access_token: str) -> bool:
             current_day = data['result']['signInLogs'][i - 1]
             break
 
-    reward = '无奖励' if not current_day['reward'] else f'获得{current_day["notice"]}'
+    reward = (
+        '无奖励'
+        if not current_day['isReward']
+        else f'获得 {current_day["reward"]["name"]} {current_day["reward"]["description"]}'
+    )
     logging.info(f'签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
     logging.info(f'本次签到 {reward}')
 
+    push(reward, data['result']['signInCount'])
+
     return True
+
+
+def push(
+        signin_result: Optional[str] = None,
+        signin_count: Optional[int] = None,
+) -> NoReturn:
+    """
+    推送签到结果
+
+    :param signin_result: 签到结果
+    :param signin_count: 当月累计签到天数
+    :return:
+    """
+    config = ConfigObj('config.ini', encoding='UTF8')
+
+    configured_push_types = [
+        i.strip()
+        for i in (
+            [config['push_types']]
+            if type(config['push_types']) == str
+            else config['push_types']
+        )
+    ]
+
+    for push_type, pusher in {
+        'dingtalk': dingtalk,
+        'serverchan': serverchan,
+        'pushdeer': pushdeer,
+        'telegram': telegram,
+        'pushplus': pushplus,
+    }.items():
+        if push_type in configured_push_types:
+            pusher.push(signin_result, signin_count, config)
 
 
 def init_logger() -> NoReturn:
@@ -89,7 +131,9 @@ def init_logger() -> NoReturn:
     """
     log = logging.getLogger()
     log.setLevel(logging.INFO)
-    log_format = logging.Formatter('%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s')
+    log_format = logging.Formatter(
+        '%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s: %(message)s'
+    )
 
     # Console
     ch = logging.StreamHandler()
@@ -144,10 +188,13 @@ def main():
 
     init_logger()  # 初始化日志系统
 
-    config = ConfigObj('config.ini')  # 获取配置文件
+    config = ConfigObj('config.ini', encoding='UTF8')  # 获取配置文件
 
     # 检查 access token 有效性
-    if int(config['expired_at']) < int(time() * 1000) or not get_access_token():
+    if (
+            int(config['expired_at']) < int(time() * 1000)
+            or not get_access_token()
+    ):
         logging.info('access_token 已过期, 正在更新...')
         data = update_access_token(config['refresh_token'])
         if not data:
