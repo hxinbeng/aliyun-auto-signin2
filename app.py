@@ -36,7 +36,7 @@ def get_access_token(refresh_token: str) -> bool | dict:
         if data['code'] in [
             'RefreshTokenExpired', 'InvalidParameter.RefreshToken',
         ]:
-            logging.error(f'获取 Access Token 失败, 错误信息: {data}')
+            logging.error(f'[{refresh_token}] 获取 access token 失败, 错误信息: {data}')
             return False
     except KeyError:
         pass
@@ -47,14 +47,16 @@ def get_access_token(refresh_token: str) -> bool | dict:
         'access_token': data['access_token'],
         'refresh_token': data['refresh_token'],
         'expired_at': int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000,
+        'phone': data['user_name'],
     }
 
 
-def sign_in(access_token: str) -> bool:
+def sign_in(access_token: str, phone: str) -> bool:
     """
     签到函数
 
     :param access_token: access_token
+    :param phone: 用户手机号
     :return: 是否签到成功
     """
     data = requests.post(
@@ -66,7 +68,7 @@ def sign_in(access_token: str) -> bool:
     ).json()
 
     if 'success' not in data:
-        logging.error(f'签到失败, 错误信息: {data}')
+        logging.error(f'[{phone}] 签到失败, 错误信息: {data}')
         push(data)
         return False
 
@@ -81,21 +83,23 @@ def sign_in(access_token: str) -> bool:
         if not current_day['isReward']
         else f'获得 {current_day["reward"]["name"]} {current_day["reward"]["description"]}'
     )
-    logging.info(f'签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
-    logging.info(f'本次签到 {reward}')
+    logging.info(f'[{phone}] 签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
+    logging.info(f'[{phone}] 本次签到 {reward}')
 
-    push(reward, data['result']['signInCount'])
+    push(phone, reward, data['result']['signInCount'])
 
     return True
 
 
 def push(
+        phone: str,
         signin_result: Optional[str] = None,
         signin_count: Optional[int] = None,
 ) -> NoReturn:
     """
     推送签到结果
 
+    :param phone: 用户手机号
     :param signin_result: 签到结果
     :param signin_count: 当月累计签到天数
     :return:
@@ -119,7 +123,7 @@ def push(
         'pushplus': pushplus,
     }.items():
         if push_type in configured_push_types:
-            pusher.push(signin_result, signin_count, config)
+            pusher.push(phone, signin_result, signin_count, config)
 
 
 def init_logger() -> NoReturn:
@@ -160,18 +164,32 @@ def main():
 
     config = ConfigObj('config.ini', encoding='UTF8')  # 获取配置文件
 
-    # Access Token
-    data = get_access_token(config['refresh_token'])
-    if not data:
-        logging.error('获取 Access Token 失败.')
+    # 获取所有 refresh token 指向用户
+    users = (
+        [config['refresh_token']]
+        if type(config['refresh_token']) == str
+        else config['refresh_token']
+    )
 
-    config['refresh_token'] = data['refresh_token']
-    config.write()
+    new_users = []
 
-    # 签到
-    if not sign_in(data['access_token']):
-        logging.error('签到失败.')
-        return
+    for user in users:
+        # Access Token
+        data = get_access_token(user)
+        if not data:
+            logging.error(f'[{user}] 获取 access token 失败.')
+            new_users.append(user)
+            continue
+
+        new_users.append(data['refresh_token'])
+
+        # 签到
+        if not sign_in(data['access_token'], data['phone']):
+            logging.error(f'[{data["phone"]}] 签到失败.')
+            continue
+
+    # 更新 refresh token
+    config['refresh_token'] = new_users
 
 
 if __name__ == '__main__':

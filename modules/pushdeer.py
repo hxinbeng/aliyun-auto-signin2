@@ -38,6 +38,7 @@ class Pusher:
 
 
 def push(
+        phone: str,
         signin_result: Optional[str],
         signin_count: Optional[int],
         config: Optional[ConfigObj],
@@ -45,6 +46,7 @@ def push(
     """
     签到消息推送
 
+    :param phone: 手机号
     :param signin_result: 签到结果
     :param signin_count: 签到天数
     :param config: 配置文件, ConfigObj 对象
@@ -61,9 +63,9 @@ def push(
         pusher = Pusher(config['pushdeer_endpoint'], config['pushdeer_send_key'])
         pusher.send(
             '阿里云盘自动签到',
-            f'签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
+            f'[{phone}] 签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
             if signin_result and signin_count
-            else f'签到失败: {signin_result}',
+            else f'[{phone}] 签到失败: {signin_result}',
         )
         logging.info('PushDeer 推送成功')
     except Exception as e:

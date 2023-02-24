@@ -1,4 +1,11 @@
+<div align=center>
+
 # Aliyun Auto Signin
+
+![GitHub release](https://img.shields.io/github/v/release/ImYrS/aliyun-auto-signin)
+![wakatime](https://wakatime.com/badge/user/92b8bbab-18e1-4e0c-af6d-082cc16c9d8a/project/0547bf5c-f66c-4798-ab89-96ddb017fef7.svg)
+
+</div>
 
 ## 说明
 
@@ -8,14 +15,11 @@
 |------|:----:|:----:|
 | 签到   |  Y   |  -   |
 | 签到推送 |  Y   |  -   |
-| 多账户  |  N   |  N   |
+| 多账户  |  Y   |  -   |
 
-_该项目不支持多账户同时签到, 且未来不会添加该功能. 如有需要请等待另一闭源签到平台的发布, 或部署多份代码同时运行._
+*多账户场景下的签到推送功能尚未经过完整测试, 遇到问题欢迎提出 Issues 进行反馈*
 
 ## 使用方法
-
-注意: main 分支仅支持 Python 3.10 及以上版本, 低于 3.10 的版本请移步
-[低版本兼容分支](https://github.com/ImYrS/aliyun-auto-signin/tree/older-python-version)
 
 1. Clone 本项目到本地或下载 Release 版本
 2. 环境安装
@@ -26,7 +30,7 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
         ```
 3. 修改配置文件
     1. 复制 `example.config.ini` 为 `config.ini`
-    2. 在配置文件中填入你的阿里云盘 `refresh token`
+    2. 在配置文件中填入你的阿里云盘 `refresh token`, 多账户同时签到使用英文逗号分隔
     3. 按需填写推送配置参数, 支持的推送渠道见下方
     4. 保存配置文件
 4. 运行并查看是否成功签到
@@ -35,6 +39,13 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
     ```
 5. 使用任意方式每日定时运行 `app.py` 即可
 6. 以 nohup 等后台形式运行时, 可在 自动生成的 `.log` 文件中查看运行日志
+
+## 低版本 Python
+
+注意: main 分支仅支持 Python 3.10 及以上版本, 低于 3.10 的版本请移步
+[低版本兼容分支](https://github.com/ImYrS/aliyun-auto-signin/tree/older-python-version)
+
+*低版本兼容分支并非实时维护, 可能与主分支存在功能差异*
 
 ## 推送渠道
 
@@ -68,3 +79,4 @@ _该项目不支持多账户同时签到, 且未来不会添加该功能. 如有
 
 - 欢迎在 [Issues](https://github.com/ImYrS/aliyun-auto-signin/issues) 中反馈问题
 - PRs are welcome
+- 你的 Star 是我维护的动力
