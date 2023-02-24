@@ -78,5 +78,5 @@
 ## 其他
 
 - 欢迎在 [Issues](https://github.com/ImYrS/aliyun-auto-signin/issues) 中反馈问题
-- PRs are welcome
 - 你的 Star 是我维护的动力
+- PRs are welcome
