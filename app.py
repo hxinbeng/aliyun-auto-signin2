@@ -17,9 +17,9 @@ import requests
 from modules import dingtalk, serverchan, pushdeer, telegram, pushplus
 
 
-def update_access_token(refresh_token: str) -> bool | dict:
+def get_access_token(refresh_token: str) -> bool | dict:
     """
-    使用 refresh_token 更新 access_token
+    使用 refresh_token 获取 access_token
 
     :param refresh_token: refresh_token
     :return: 更新成功返回字典, 失败返回 False
@@ -36,7 +36,7 @@ def update_access_token(refresh_token: str) -> bool | dict:
         if data['code'] in [
             'RefreshTokenExpired', 'InvalidParameter.RefreshToken',
         ]:
-            logging.error(f'更新 access_token 失败, 错误信息: {data}')
+            logging.error(f'获取 Access Token 失败, 错误信息: {data}')
             return False
     except KeyError:
         pass
@@ -148,35 +148,6 @@ def init_logger() -> NoReturn:
     log.addHandler(fh)
 
 
-def get_access_token() -> str | None:
-    """
-    从本地文件获取 access_token
-
-    :return: access_token
-    """
-    try:
-        with open('access_token', 'r') as f:
-            return f.read()
-    except FileNotFoundError:
-        return None
-
-
-def update_access_token_file(access_token: str) -> bool:
-    """
-    更新本地 access_token 文件
-
-    :param access_token: access_token
-    :return: 是否更新成功
-    """
-    try:
-        with open('access_token', 'w') as f:
-            f.write(access_token)
-        return True
-    except Exception as e:
-        logging.error(f'更新 access_token 文件失败, 错误信息: {e}')
-        return False
-
-
 def main():
     """
     主函数
@@ -189,24 +160,16 @@ def main():
 
     config = ConfigObj('config.ini', encoding='UTF8')  # 获取配置文件
 
-    # 检查 access token 有效性
-    if (
-            int(config['expired_at']) < int(time() * 1000)
-            or not get_access_token()
-    ):
-        logging.info('access_token 已过期, 正在更新...')
-        data = update_access_token(config['refresh_token'])
-        if not data:
-            logging.error('更新 access_token 失败.')
-            return
+    # Access Token
+    data = get_access_token(config['refresh_token'])
+    if not data:
+        logging.error('获取 Access Token 失败.')
 
-        update_access_token_file(data['access_token'])
-        config['refresh_token'] = data['refresh_token']
-        config['expired_at'] = data['expired_at']
-        config.write()
+    config['refresh_token'] = data['refresh_token']
+    config.write()
 
     # 签到
-    if not sign_in(get_access_token()):
+    if not sign_in(data['access_token']):
         logging.error('签到失败.')
         return
 
