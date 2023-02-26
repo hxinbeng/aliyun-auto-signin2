@@ -25,7 +25,7 @@
          - uses: ImYrS/aliyun-auto-signin@main
            with:
              REFRESH_TOKENS: ${{ secrets.REFRESH_TOKENS }}
-             PUSH_TYPES:
+             PUSH_TYPES: ''
              SERVERCHAN_SEND_KEY: ${{ secrets.SERVERCHAN_SEND_KEY }}
              TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
              TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
