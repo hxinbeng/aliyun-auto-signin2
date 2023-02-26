@@ -5,14 +5,11 @@
 ![GitHub release](https://img.shields.io/github/v/release/ImYrS/aliyun-auto-signin)
 ![wakatime](https://wakatime.com/badge/user/92b8bbab-18e1-4e0c-af6d-082cc16c9d8a/project/0547bf5c-f66c-4798-ab89-96ddb017fef7.svg)
 
-</div>
-
-## 说明
-
 项目用于自动实现阿里云盘的每日签到活动.  
 **支持 GitHub Action , 无需额外操作或服务器即可实现每日自动签到.**
 
-## [如何使用 Action 无服务器签到](https://github.com/ImYrS/aliyun-auto-signin/blob/main/How-To-Use-Action.md)
+### [立即尝试使用 Action 签到](https://github.com/ImYrS/aliyun-auto-signin/blob/main/How-To-Use-Action.md)
+</div>
 
 ## 功能
 
@@ -25,7 +22,9 @@
 
 *多账户场景下的签到推送功能尚未经过完整测试, 遇到问题欢迎提出 Issues 进行反馈*
 
-## 使用方法
+## 本地运行使用方法
+
+*[GitHub Action 使用方法](https://github.com/ImYrS/aliyun-auto-signin/blob/main/How-To-Use-Action.md)*
 
 1. Clone 本项目到本地或下载 Release 版本
 2. 环境安装
@@ -55,7 +54,7 @@
 
 ## 推送渠道
 
-*本地运行和 Github Action 运行支持的推送渠道和配置方案不同*
+*本地运行和 Github Action 运行支持的推送渠道与配置方法不同*
 
 | 渠道           | 本地  | Action |
 |--------------|:---:|:------:|
