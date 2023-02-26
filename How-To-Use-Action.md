@@ -1,9 +1,9 @@
 # Action 使用指南
 
 ## 特性
-1. 支持无服务器运行, 0 成本挂脚本
-2. 部署一次, 自动更新
-3. 推送至 Telegram 渠道无需代理
+- 支持无服务器运行, 0 成本挂脚本
+- 部署一次, 自动跟随主仓库更新代码
+- 推送至 Telegram 渠道无需代理
 
 ## 准备工作
 
@@ -13,7 +13,7 @@
 
 ## 编写 Action 配置
 
-1. 编辑 `.github/workflows/signin.yml` 文件, 写入 Action 配置, 以下是参考配置
+1. 创建 `.github/workflows/signin.yml` 文件, 写入 Action 配置, 以下是参考配置
    ```yaml
    name: Aliyun Signin
    
@@ -67,6 +67,15 @@
 ## 查看结果
 
 可以在运行的 Action 运行记录中的 `Run ImYrS/aliyun-auto-signin@main` 末尾查看运行结果
+
+## 注意
+
+当前 Action Workflow 尚未经过完全验证, 已知存在或可能存在以下问题.
+
+- 无法自动更新 refresh token, 可能存在运行数天后鉴权失败的情况, 需要手动更新.
+- 不配置推送渠道且代码未报错情况下无法直观检查签到结果, 只能进入 workflow 日志查看.
+
+**如果你有更好或其他解决方案, 欢迎 PR**
 
 ## 其他
 
