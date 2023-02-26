@@ -9,6 +9,8 @@
 **支持 GitHub Action , 无需额外操作或服务器即可实现每日自动签到.**
 
 ### [立即尝试使用 Action 签到](https://github.com/ImYrS/aliyun-auto-signin/blob/main/How-To-Use-Action.md)
+
+如果这个项目帮助到了你, 请考虑给我一个 Star :star:
 </div>
 
 ## 功能
@@ -93,5 +95,5 @@
 ## 其他
 
 - 欢迎在 [Issues](https://github.com/ImYrS/aliyun-auto-signin/issues) 中反馈问题
-- 你的 Star 是我维护的动力
+- 你的 Star :star: 是我维护的动力
 - PRs are welcome
