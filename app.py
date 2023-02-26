@@ -7,7 +7,8 @@
 
 import logging
 from os import environ
-from time import mktime, time
+from sys import argv
+from time import mktime
 from datetime import datetime
 from typing import NoReturn, Optional
 
@@ -51,10 +52,15 @@ def get_access_token(refresh_token: str) -> bool | dict:
     }
 
 
-def sign_in(access_token: str, phone: str) -> bool:
+def sign_in(
+        config: ConfigObj | dict,
+        access_token: str,
+        phone: str
+) -> bool:
     """
     签到函数
 
+    :param config: 配置文件, ConfigObj 对象或字典
     :param access_token: access_token
     :param phone: 用户手机号
     :return: 是否签到成功
@@ -69,7 +75,7 @@ def sign_in(access_token: str, phone: str) -> bool:
 
     if 'success' not in data:
         logging.error(f'[{phone}] 签到失败, 错误信息: {data}')
-        push(data)
+        push(config, data)
         return False
 
     current_day = None
@@ -86,12 +92,13 @@ def sign_in(access_token: str, phone: str) -> bool:
     logging.info(f'[{phone}] 签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
     logging.info(f'[{phone}] 本次签到 {reward}')
 
-    push(phone, reward, data['result']['signInCount'])
+    push(config, phone, reward, data['result']['signInCount'])
 
     return True
 
 
 def push(
+        config: ConfigObj | dict,
         phone: str,
         signin_result: Optional[str] = None,
         signin_count: Optional[int] = None,
@@ -99,13 +106,12 @@ def push(
     """
     推送签到结果
 
+    :param config: 配置文件, ConfigObj 对象或字典
     :param phone: 用户手机号
     :param signin_result: 签到结果
     :param signin_count: 当月累计签到天数
     :return:
     """
-    config = ConfigObj('config.ini', encoding='UTF8')
-
     configured_push_types = [
         i.strip()
         for i in (
@@ -152,6 +158,36 @@ def init_logger() -> NoReturn:
     log.addHandler(fh)
 
 
+def get_config_from_env() -> Optional[dict]:
+    """
+    从环境变量获取配置
+
+    :return: 配置字典, 配置缺失返回 None
+    """
+    try:
+        return {
+            'refresh_tokens': (
+                [environ['REFRESH_TOKENS']]
+                if not environ['REFRESH_TOKENS']
+                else environ['REFRESH_TOKENS'].split(',')
+            ),
+            'push_types': (
+                [environ['PUSH_TYPES']]
+                if not environ['PUSH_TYPES']
+                else environ['PUSH_TYPES'].split(',')
+            ),
+            'serverchan_send_key': environ['SERVERCHAN_SEND_KEY'],
+            'telegram_endpoint': 'https://api.telegram.org',
+            'telegram_bot_token': environ['TELEGRAM_BOT_TOKEN'],
+            'telegram_chat_id': environ['TELEGRAM_CHAT_ID'],
+            'telegram_proxy': None,
+            'pushplus_token': environ['PUSHPLUS_TOKEN'],
+        }
+    except KeyError as e:
+        logging.error(f'环境变量 {e} 缺失.')
+        return None
+
+
 def main():
     """
     主函数
@@ -162,7 +198,22 @@ def main():
 
     init_logger()  # 初始化日志系统
 
-    config = ConfigObj('config.ini', encoding='UTF8')  # 获取配置文件
+    by_action = (
+        True
+        if len(argv) == 2 and argv[1] == 'action'
+        else False
+    )
+
+    # 获取配置
+    config = (
+        get_config_from_env()
+        if by_action
+        else ConfigObj('config.ini', encoding='UTF8')
+    )
+
+    if not config:
+        logging.error('获取配置失败.')
+        return
 
     # 获取所有 refresh token 指向用户
     users = (
@@ -184,12 +235,13 @@ def main():
         new_users.append(data['refresh_token'])
 
         # 签到
-        if not sign_in(data['access_token'], data['phone']):
+        if not sign_in(config, data['access_token'], data['phone']):
             logging.error(f'[{data["phone"]}] 签到失败.')
             continue
 
-    # 更新 refresh token
-    config['refresh_tokens'] = new_users
+    if not by_action:
+        # 更新 refresh token
+        config['refresh_tokens'] = new_users
 
 
 if __name__ == '__main__':

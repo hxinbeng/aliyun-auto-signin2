@@ -1,0 +1,63 @@
+name: Aliyun Signin
+author: ImYrS
+description: 'AliyunDrive signin automatically'
+
+inputs:
+  REFRESH_TOKENS:
+    description: 'AliyunDrive refresh tokens'
+    required: true
+
+  PUSH_TYPES:
+    description: 'Push types for signin result'
+    required: false
+    default: false
+
+  SERVERCHAN_SEND_KEY:
+    description: 'ServerChan send key'
+    required: false
+    default: false
+
+  TELEGRAM_BOT_TOKEN:
+    description: 'Telegram bot token'
+    required: false
+    default: false
+
+  TELEGRAM_CHAT_ID:
+    description: 'Telegram chat id'
+    required: false
+    default: false
+
+  PUSHPLUS_TOKEN:
+    description: 'PushPlus token'
+    required: false
+    default: false
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Dependencies
+      shell: bash
+      run: pip install configobj requests
+    - name: Download
+      shell: bash
+      run: |
+        wget https://github.com/ImYrS/aliyun-auto-signin/archive/refs/heads/action.zip
+        rm -rf signin
+        unzip action.zip -d signin
+        rm action.zip
+    - name: Run
+      shell: bash
+      run: |
+        cd signin/aliyun-auto-signin-action
+        python app.py action
+      env:
+        REFRESH_TOKENS: ${{ inputs.REFRESH_TOKENS }}
+        PUSH_TYPES: ${{ inputs.PUSH_TYPES }}
+        SERVERCHAN_SEND_KEY: ${{ inputs.SERVERCHAN_SEND_KEY }}
+        TELEGRAM_BOT_TOKEN: ${{ inputs.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ inputs.TELEGRAM_CHAT_ID }}
+        PUSHPLUS_TOKEN: ${{ inputs.PUSHPLUS_TOKEN }}
