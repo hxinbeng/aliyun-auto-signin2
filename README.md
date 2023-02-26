@@ -17,10 +17,10 @@
 
 | 功能        | 是否支持 | 未来计划 |
 |-----------|:----:|:----:|
-| 签到        |  Y   |  -   |
-| 签到推送      |  Y   |  -   |
-| 多账户       |  Y   |  -   |
-| Action 签到 |  Y   |  -   |
+| 签到        |  ✅   |  -   |
+| 签到推送      |  ✅   |  -   |
+| 多账户       |  ✅   |  -   |
+| Action 签到 |  ✅   |  -   |
 
 *多账户场景下的签到推送功能尚未经过完整测试, 遇到问题欢迎提出 Issues 进行反馈*
 
@@ -60,11 +60,11 @@
 
 | 渠道           | 本地  | Action |
 |--------------|:---:|:------:|
-| DingDingTalk |  Y  |   N    |
-| ServerChan   |  Y  |   Y    |
-| PushDeer     |  Y  |   N    |
-| Telegram     |  Y  |   Y    |
-| PushPlus     |  Y  |   Y    |
+| DingDingTalk |  ✅  |   ❌    |
+| ServerChan   |  ✅  |   ✅    |
+| PushDeer     |  ✅  |   ❌    |
+| Telegram     |  ✅  |   ✅    |
+| PushPlus     |  ✅  |   ✅    |
 
 - 钉钉机器人
     - `app_key`: 机器人的 `appKey`
