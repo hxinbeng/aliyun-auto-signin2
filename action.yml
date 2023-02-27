@@ -85,14 +85,15 @@ runs:
     - name: Download
       shell: bash
       run: |
-        wget https://github.com/ImYrS/aliyun-auto-signin/archive/refs/tags/${{ steps.version.outputs.release }}.zip -O main.zip
-        rm -rf signin
-        unzip main.zip -d signin
-        rm main.zip
+        wget https://github.com/ImYrS/aliyun-auto-signin/archive/refs/tags/${{ steps.version.outputs.release }}.zip -O release.zip
+        rm -rf release
+        unzip release.zip -d release
+        rm release.zip
     - name: Run
       shell: bash
       run: |
-        cd signin/aliyun-auto-signin-${{ steps.version.outputs.release }}
+        cd release
+        cd $(ls -dt */|head -1 )
         python app.py action
       env:
         REFRESH_TOKENS: ${{ inputs.REFRESH_TOKENS }}
