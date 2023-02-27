@@ -183,6 +183,13 @@ def get_config_from_env() -> Optional[dict]:
             'telegram_chat_id': environ['TELEGRAM_CHAT_ID'],
             'telegram_proxy': None,
             'pushplus_token': environ['PUSHPLUS_TOKEN'],
+            'smtp_host': environ['SMTP_HOST'],
+            'smtp_port': environ['SMTP_PORT'],
+            'smtp_tls': environ['SMTP_TLS'],
+            'smtp_user': environ['SMTP_USER'],
+            'smtp_password': environ['SMTP_PASSWORD'],
+            'smtp_sender': environ['SMTP_SENDER'],
+            'smtp_receiver': environ['SMTP_RECEIVER'],
         }
     except KeyError as e:
         logging.error(f'环境变量 {e} 缺失.')

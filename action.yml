@@ -32,6 +32,41 @@ inputs:
     required: false
     default: false
 
+  SMTP_HOST:
+    description: 'SMTP host'
+    required: false
+    default: false
+
+  SMTP_PORT:
+    description: 'SMTP port'
+    required: false
+    default: false
+
+  SMTP_TLS:
+    description: 'SMTP TLS'
+    required: false
+    default: true
+
+  SMTP_USER:
+    description: 'SMTP user'
+    required: false
+    default: false
+
+  SMTP_PASSWORD:
+    description: 'SMTP password'
+    required: false
+    default: false
+
+  SMTP_SENDER:
+    description: 'SMTP sender'
+    required: false
+    default: false
+
+  SMTP_RECEIVER:
+    description: 'SMTP receiver'
+    required: false
+    default: false
+
 runs:
   using: composite
   steps:
@@ -61,6 +96,13 @@ runs:
         TELEGRAM_BOT_TOKEN: ${{ inputs.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ inputs.TELEGRAM_CHAT_ID }}
         PUSHPLUS_TOKEN: ${{ inputs.PUSHPLUS_TOKEN }}
+        SMTP_HOST: ${{ inputs.SMTP_HOST }}
+        SMTP_PORT: ${{ inputs.SMTP_PORT }}
+        SMTP_TLS: ${{ inputs.SMTP_TLS }}
+        SMTP_USER: ${{ inputs.SMTP_USER }}
+        SMTP_PASSWORD: ${{ inputs.SMTP_PASSWORD }}
+        SMTP_SENDER: ${{ inputs.SMTP_SENDER }}
+        SMTP_RECEIVER: ${{ inputs.SMTP_RECEIVER }}
 
 branding:
     icon: 'check-circle'
