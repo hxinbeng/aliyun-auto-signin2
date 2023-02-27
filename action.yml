@@ -10,62 +10,62 @@ inputs:
   PUSH_TYPES:
     description: 'Push types for signin result'
     required: false
-    default: false
+    default: ''
 
   SERVERCHAN_SEND_KEY:
     description: 'ServerChan send key'
     required: false
-    default: false
+    default: ''
 
   TELEGRAM_BOT_TOKEN:
     description: 'Telegram bot token'
     required: false
-    default: false
+    default: ''
 
   TELEGRAM_CHAT_ID:
     description: 'Telegram chat id'
     required: false
-    default: false
+    default: ''
 
   PUSHPLUS_TOKEN:
     description: 'PushPlus token'
     required: false
-    default: false
+    default: ''
 
   SMTP_HOST:
     description: 'SMTP host'
     required: false
-    default: false
+    default: ''
 
   SMTP_PORT:
     description: 'SMTP port'
     required: false
-    default: false
+    default: ''
 
   SMTP_TLS:
     description: 'SMTP TLS'
     required: false
-    default: true
+    default: 'true'
 
   SMTP_USER:
     description: 'SMTP user'
     required: false
-    default: false
+    default: ''
 
   SMTP_PASSWORD:
     description: 'SMTP password'
     required: false
-    default: false
+    default: ''
 
   SMTP_SENDER:
     description: 'SMTP sender'
     required: false
-    default: false
+    default: ''
 
   SMTP_RECEIVER:
     description: 'SMTP receiver'
     required: false
-    default: false
+    default: ''
 
 runs:
   using: composite
@@ -77,17 +77,22 @@ runs:
     - name: Dependencies
       shell: bash
       run: pip install configobj requests
+    - id: version
+      uses: pozetroninc/github-action-get-latest-release@master
+      with:
+        repository: ImYrS/aliyun-auto-signin
+        excludes: prerelease, draft
     - name: Download
       shell: bash
       run: |
-        wget https://github.com/ImYrS/aliyun-auto-signin/archive/refs/heads/main.zip
+        wget https://github.com/ImYrS/aliyun-auto-signin/archive/refs/tags/${{ steps.version.outputs.tag }}.zip -O main.zip
         rm -rf signin
         unzip main.zip -d signin
         rm main.zip
     - name: Run
       shell: bash
       run: |
-        cd signin/aliyun-auto-signin-main
+        cd signin/aliyun-auto-signin-${{ steps.version.outputs.tag }}
         python app.py action
       env:
         REFRESH_TOKENS: ${{ inputs.REFRESH_TOKENS }}
