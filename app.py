@@ -15,7 +15,7 @@ from typing import NoReturn, Optional
 from configobj import ConfigObj
 import requests
 
-from modules import dingtalk, serverchan, pushdeer, telegram, pushplus
+from modules import dingtalk, serverchan, pushdeer, telegram, pushplus, smtp
 
 
 def get_access_token(refresh_token: str) -> bool | dict:
@@ -127,6 +127,7 @@ def push(
         'pushdeer': pushdeer,
         'telegram': telegram,
         'pushplus': pushplus,
+        'smtp': smtp,
     }.items():
         if push_type in configured_push_types:
             pusher.push(phone, signin_result, signin_count, config)

@@ -59,7 +59,7 @@ def push(
         phone: str,
         signin_result: Optional[str],
         signin_count: Optional[int],
-        config: Optional[ConfigObj],
+        config: Optional[ConfigObj | dict],
 ) -> bool:
     """
     签到消息推送
@@ -67,7 +67,7 @@ def push(
     :param phone: 手机号
     :param signin_result: 签到结果
     :param signin_count: 签到天数
-    :param config: 配置文件, ConfigObj 对象
+    :param config: 配置文件, ConfigObj 对象 | dict
     :return:
     """
     if (

@@ -69,6 +69,7 @@
 | PushDeer     |  ✅  |   ❌    |
 | Telegram     |  ✅  |   ✅    |
 | PushPlus     |  ✅  |   ✅    |
+| SMTP         |  ✅  |   ✅    |
 
 - 钉钉机器人
     - `app_key`: 机器人的 `appKey`
