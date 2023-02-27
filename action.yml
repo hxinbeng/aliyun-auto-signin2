@@ -93,7 +93,7 @@ runs:
       shell: bash
       # ${{ steps.version.outputs.release }} 去掉第一个字母
       run: |
-        cd release/aliyun-auto-signin-${{ steps.version.outputs.release }}:1
+        cd release/aliyun-auto-signin-${{ steps.version.outputs.release:1 }}
         python app.py action
       env:
         REFRESH_TOKENS: ${{ inputs.REFRESH_TOKENS }}
