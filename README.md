@@ -95,6 +95,17 @@
 - PushPlus
     - `token`: PushPlus 发送消息的用户令牌 `token`
     - [PushPlus官方文档](https://www.pushplus.plus)
+
+- SMTP
+  - `smtp_host`: SMTP 服务器地址
+  - `smtp_port`: SMTP 服务器端口
+  - `smtp_tls`: 是否使用 TLS 加密
+  - `smtp_user`: SMTP 用户名
+  - `smtp_pass`: SMTP 密码
+  - `smtp_sender`: 发件人地址, 一般与用户名相同
+  - `smtp_receiver`: 收件人地址, 仅支持单个收件人
+  - 推荐使用 Microsoft Outlook 作为 SMTP 服务器
+
 - 欢迎 PR 更多推送渠道
 
 ## 其他

@@ -17,48 +17,60 @@
 
 1. 创建 `.github/workflows/signin.yml` 文件, 写入 Action 配置, 以下是参考配置
    ```yaml
-   name: Aliyun Signin
-   
-   on:
-     schedule:
-       # 每天国际时间 17:20 运行一次, 中国时间 01:20
-       - cron: '20 17 * * *'
-     workflow_dispatch:
-   jobs:
-     signin:
-       name: Aliyun Signin
-       runs-on: ubuntu-latest
-       steps:
-         - uses: ImYrS/aliyun-auto-signin@main
-           with:
-             REFRESH_TOKENS: ${{ secrets.REFRESH_TOKENS }}
-             # PUSH_TYPES support: serverchan, telegram, pushplus
-             PUSH_TYPES: ''
-             SERVERCHAN_SEND_KEY: ${{ secrets.SERVERCHAN_SEND_KEY }}
-             TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-             TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-             PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+    name: Aliyun Signin
+    
+    on:
+      schedule:
+        # 每天国际时间 17:20 运行一次, 中国时间 01:20
+        - cron: '20 17 * * *'
+      workflow_dispatch:
+    jobs:
+      signin:
+        name: Aliyun Signin
+        runs-on: ubuntu-latest
+        steps:
+          - uses: ImYrS/aliyun-auto-signin@main
+            with:
+              REFRESH_TOKENS: ${{ secrets.REFRESH_TOKENS }}
+              PUSH_TYPES: 'telegram,smtp'
+              SERVERCHAN_SEND_KEY: ${{ secrets.SERVERCHAN_SEND_KEY }}
+              TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+              TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+              PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+              SMTP_HOST: ${{ secrets.SMTP_HOST }}
+              SMTP_PORT: ${{ secrets.SMTP_PORT }}
+              SMTP_TLS: ${{ secrets.SMTP_TLS }}
+              SMTP_USER: ${{ secrets.SMTP_USER }}
+              SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+              SMTP_SENDER: ${{ secrets.SMTP_SENDER }}
+              SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
    ```
-2. 按需修改 PUSH_TYPES 参数, 以启用推送功能
+2. 按需修改 PUSH_TYPES 参数, 以启用推送功能. 使用 `telegram` 和 `smtp` 渠道在 Action 中可能获得更好体验.
    > 由于配置复杂或渠道 IP 限制等原因, 部分渠道不支持在 Github Action 中使用,
    详见项目首页的[推送渠道](https://github.com/ImYrS/aliyun-auto-signin/blob/main/README.md#%E6%8E%A8%E9%80%81%E6%B8%A0%E9%81%93)
 
 ## 配置 GitHub Secrets
 
-在仓库的 `Settings` -> `Secrets and Variables` -> `Actions` 中添加以下 Secrets
+在仓库的 `Settings` -> `Secrets and Variables` -> `Actions` 中按照推送需要添加 Secrets.
 
-- `REFRESH_TOKENS` (必需)
-  > 阿里云盘 refresh token, 多账户使用英文逗号 (,) 分隔
-- `SERVERCHAN_SEND_KEY` (可选)
-  > Server酱推送渠道的 SendKey
-- `TELEGRAM_BOT_TOKEN` (可选)
-  > Telegram Bot Token
-- `TELEGRAM_CHAT_ID` (可选)
-  > Telegram 接收推送消息的会话 ID
-- `PUSHPLUS_TOKEN` (可选)
-  > PushPlus Token
+- `REFRESH_TOKENS` **[必选]** *阿里云盘 refresh token, 多账户使用英文逗号 (,) 分隔*
 
-> 这些 `Secrets` 将加密存储在 GitHub, 无法被读取, 但是可以在 Action 中使用
+
+- `SERVERCHAN_SEND_KEY` [可选] *Server酱推送渠道的 SendKey*
+- `TELEGRAM_BOT_TOKEN` [可选] *Telegram Bot Token*
+- `TELEGRAM_CHAT_ID` [可选] *Telegram 接收推送消息的会话 ID*
+- `PUSHPLUS_TOKEN` [可选] *PushPlus Token*
+- `SMTP_HOST` [可选] *SMTP 服务器地址*
+- `SMTP_PORT` [可选] *SMTP 服务器端口*
+- `SMTP_TLS` [可选] *SMTP 服务器是否使用 TLS*
+- `SMTP_USER` [可选] *SMTP 服务器用户名*
+- `SMTP_PASSWORD` [可选] *SMTP 服务器密码*
+- `SMTP_SENDER` [可选] *SMTP 发件人邮箱*
+- `SMTP_RECEIVER` [可选] *SMTP 收件人邮箱*
+
+> 这些 `Secrets` 将加密存储在 GitHub, 无法被直接读取, 但可以在 Action 中使用
+
+正确添加后应显示在 `Repository secrets` 区域而非 `Environment secrets`.
 
 ## 运行 Action
 
