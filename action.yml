@@ -92,7 +92,8 @@ runs:
     - name: Run
       shell: bash
       run: |
-        cd release/$(ls -dt */|head -1 )
+        cd release
+        cd $(ls -dt */|head -1 )
         python app.py action
       env:
         REFRESH_TOKENS: ${{ inputs.REFRESH_TOKENS }}
