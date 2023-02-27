@@ -74,7 +74,7 @@
     - `app_key`: 机器人的 `appKey`
     - `app_secret`: 机器人的 `appSecret`
     - `user_id`: 接收消息的用户 `id`, 必须是钉钉 `userid`
-    - [钉钉机器人开发w文档](https://open.dingtalk.com/document/isvapp/send-messages-based-on-enterprise-robot-callback)
+    - [钉钉机器人开发文档](https://open.dingtalk.com/document/isvapp/send-messages-based-on-enterprise-robot-callback)
 
 - ServerChan
     - `sendkey`: ServerChan 发送消息的鉴权 `key`
