@@ -6,6 +6,13 @@
 - 自动跟随主仓库更新代码
 - 推送至 Telegram 渠道无需代理
 
+## 注意
+
+此文为小白不友好教程, 请尽量利用搜索引擎解决问题.  
+**如有提出 Issues 的必要, 请尽量提供报错截图, 错误情况, 以及尝试过的解决方案.**
+
+提问前必看: [提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/main/README-zh_CN.md)
+
 ## 准备工作
 
 1. 创建一个新的公开或隐私仓库, 如 `aliyun-signin-action`
@@ -16,12 +23,12 @@
 ## 编写 Action 配置
 
 1. 创建 `.github/workflows/signin.yml` 文件, 写入 Action 配置, 以下是参考配置
-   ```yaml
+    ```yaml
     name: Aliyun Signin
     
     on:
       schedule:
-        # 每天国际时间 17:20 运行一次, 中国时间 01:20
+       # 每天国际时间 17:20 运行一次, 中国时间 01:20
         - cron: '20 17 * * *'
       workflow_dispatch:
     jobs:
@@ -32,7 +39,7 @@
           - uses: ImYrS/aliyun-auto-signin@main
             with:
               REFRESH_TOKENS: ${{ secrets.REFRESH_TOKENS }}
-              PUSH_TYPES: 'telegram,smtp'
+              PUSH_TYPES: ''
               SERVERCHAN_SEND_KEY: ${{ secrets.SERVERCHAN_SEND_KEY }}
               TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
               TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -44,14 +51,15 @@
               SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
               SMTP_SENDER: ${{ secrets.SMTP_SENDER }}
               SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
-   ```
-2. 按需修改 PUSH_TYPES 参数, 以启用推送功能. 使用 `telegram` 和 `smtp` 渠道在 Action 中可能获得更好体验.
+    ```
+2. 按需填写上方配置中的 PUSH_TYPES 参数, 以启用推送功能. 使用 `telegram` 和 `smtp` 渠道在 Action 中可能获得更好体验.
    > 由于配置复杂或渠道 IP 限制等原因, 部分渠道不支持在 Github Action 中使用,
    详见项目首页的[推送渠道](https://github.com/ImYrS/aliyun-auto-signin/blob/main/README.md#%E6%8E%A8%E9%80%81%E6%B8%A0%E9%81%93)
 
 ## 配置 GitHub Secrets
 
-在仓库的 `Settings` -> `Secrets and Variables` -> `Actions` 中按照推送需要添加 Secrets.
+在仓库的 `Settings` -> `Secrets and Variables` -> `Actions` 中点击 `New repository secret` 按照推送需要添加 Secrets.  
+添加时 `Name` 为下方全大写的配置 key, `Secret` 为对应的值, 均不需要引号.
 
 - `REFRESH_TOKENS` **[必选]** *阿里云盘 refresh token, 多账户使用英文逗号 (,) 分隔*
 

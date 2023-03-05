@@ -110,6 +110,6 @@
 
 ## 其他
 
-- 欢迎在 [Issues](https://github.com/ImYrS/aliyun-auto-signin/issues) 中反馈问题
+- 欢迎在 [Issues](https://github.com/ImYrS/aliyun-auto-signin/issues) 中反馈 Bug
 - 你的 Star :star: 是我维护的动力
 - PRs are welcome
