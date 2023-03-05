@@ -113,7 +113,7 @@ def push(
     :return:
     """
     configured_push_types = [
-        i.strip()
+        i.lower().strip()
         for i in (
             [config['push_types']]
             if type(config['push_types']) == str
