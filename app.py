@@ -14,6 +14,7 @@ from typing import NoReturn, Optional
 
 from configobj import ConfigObj
 import requests
+import github
 
 from modules import dingtalk, serverchan, pushdeer, telegram, pushplus, smtp
 
@@ -250,6 +251,8 @@ def main():
     if not by_action:
         # 更新 refresh token
         config['refresh_tokens'] = new_users
+    else:
+        github.update_secret("REFRESH_TOKENS", ",".join(new_users))
 
 
 if __name__ == '__main__':
