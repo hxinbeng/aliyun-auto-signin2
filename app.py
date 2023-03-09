@@ -248,11 +248,11 @@ def main():
             logging.error(f'[{data["phone"]}] 签到失败.')
             continue
 
+    # 更新 refresh token
     if not by_action:
-        # 更新 refresh token
         config['refresh_tokens'] = new_users
     else:
-        github.update_secret("REFRESH_TOKENS", ",".join(new_users))
+        github.update_secret('REFRESH_TOKENS', ','.join(new_users))
 
 
 if __name__ == '__main__':
