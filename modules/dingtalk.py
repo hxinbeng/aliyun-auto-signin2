@@ -5,7 +5,7 @@
     @Description: 
 """
 
-from typing import List, Optional
+from typing import List
 import logging
 
 import requests
@@ -58,18 +58,18 @@ class Pusher:
 
 
 def push(
-        phone: str,
-        signin_result: Optional[str],
-        signin_count: Optional[int],
-        config: Optional[ConfigObj | dict],
+        config: ConfigObj | dict,
+        content: str,
+        content_html: str,
+        title: str,
 ) -> bool:
     """
     签到消息推送
 
-    :param phone: 手机号
-    :param signin_result: 签到结果
-    :param signin_count: 签到天数
     :param config: 配置文件, ConfigObj 对象 | dict
+    :param content: 推送内容
+    :param content_html: 推送内容, HTML 格式
+    :param title: 标题
     :return:
     """
     if (
@@ -84,9 +84,7 @@ def push(
         pusher = Pusher(config['dingtalk_app_key'], config['dingtalk_app_secret'])
         pusher.send(
             [config['dingtalk_user_id']],
-            f'[{phone}] 阿里云盘签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
-            if signin_result and signin_count
-            else f'[{phone}] 阿里云盘签到失败: {signin_result}',
+            f'{title}\n\n{content}'
         )
         logging.info('DingTalk 推送成功')
     except Exception as e:

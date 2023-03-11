@@ -56,18 +56,18 @@ class Pusher:
 
 
 def push(
-        phone: str,
-        signin_result: Optional[str],
-        signin_count: Optional[int],
-        config: Optional[ConfigObj | dict],
+        config: ConfigObj | dict,
+        content: str,
+        content_html: str,
+        title: str,
 ) -> bool:
     """
     签到消息推送
 
-    :param phone: 手机号
-    :param signin_result: 签到结果
-    :param signin_count: 签到天数
     :param config: 配置文件, ConfigObj 对象 | dict
+    :param content: 推送内容
+    :param content_html: 推送内容, HTML 格式
+    :param title: 标题
     :return:
     """
     if (
@@ -85,12 +85,7 @@ def push(
             config['telegram_chat_id'],
             config['telegram_proxy'],
         )
-        if(pusher.send(
-                '阿里云盘自动签到',
-                f'<code>{phone}</code> 签到成功: 本月累计签到 {signin_count} 天. 本次签到 {signin_result}'
-                if signin_result and signin_count
-                else f'<code>{phone}</code> 签到失败: {signin_result}',
-        )):
+        if pusher.send(title, content_html):
             logging.info('Telegram 推送成功')
     except Exception as e:
         logging.error(f'Telegram 推送失败, 错误信息: {e}')

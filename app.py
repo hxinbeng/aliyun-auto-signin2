@@ -8,9 +8,8 @@
 import logging
 from os import environ
 from sys import argv
-from time import mktime
-from datetime import datetime
 from typing import NoReturn, Optional
+import json
 
 from configobj import ConfigObj
 import requests
@@ -19,98 +18,170 @@ import github
 from modules import dingtalk, serverchan, pushdeer, telegram, pushplus, smtp
 
 
-def get_access_token(refresh_token: str) -> bool | dict:
+class SignIn:
     """
-    使用 refresh_token 获取 access_token
+    签到
+    """
 
-    :param refresh_token: refresh_token
-    :return: 更新成功返回字典, 失败返回 False
-    """
-    data = requests.post(
-        'https://auth.aliyundrive.com/v2/account/token',
-        json={
-            'grant_type': 'refresh_token',
-            'refresh_token': refresh_token,
+    def __init__(
+            self,
+            config: ConfigObj | dict,
+            refresh_token: str,
+    ):
+        """
+        初始化
+
+        :param config: 配置文件, ConfigObj 对象或字典
+        :param refresh_token: refresh_token
+        """
+        self.config = config
+        self.refresh_token = refresh_token
+        self.hide_refresh_token = self.__hide_refresh_token()
+        self.access_token = None
+        self.new_refresh_token = None
+        self.phone = None
+        self.signin_count = 0
+        self.signin_reward = None
+        self.error = None
+
+    def __hide_refresh_token(self) -> str:
+        """
+        隐藏 refresh_token
+
+        :return: 隐藏后的 refresh_token
+        """
+        try:
+            return self.refresh_token[:4] + '*' * len(self.refresh_token[4:-4]) + self.refresh_token[-4:]
+        except IndexError:
+            return self.refresh_token
+
+    def __get_access_token(self) -> bool:
+        """
+        获取 access_token
+
+        :return: 更新成功返回字典, 失败返回 False
+        """
+        data = requests.post(
+            'https://auth.aliyundrive.com/v2/account/token',
+            json={
+                'grant_type': 'refresh_token',
+                'refresh_token': self.refresh_token,
+            }
+        ).json()
+
+        try:
+            if data['code'] in [
+                'RefreshTokenExpired', 'InvalidParameter.RefreshToken',
+            ]:
+                logging.error(f'[{self.hide_refresh_token}] 获取 access token 失败, 可能是 refresh token 无效.')
+                self.error = data
+                return False
+        except KeyError:
+            pass
+
+        self.access_token = data['access_token']
+        self.new_refresh_token = data['refresh_token']
+        self.phone = data['user_name']
+
+        return True
+
+    def __sign_in(self) -> NoReturn:
+        """
+        签到函数
+
+        :return:
+        """
+        data = requests.post(
+            'https://member.aliyundrive.com/v1/activity/sign_in_list',
+            headers={
+                'Authorization': f'Bearer {self.access_token}',
+            },
+            json={},
+        ).json()
+
+        if 'success' not in data:
+            logging.error(f'[{self.phone}] 签到失败, 错误信息: {data}')
+            self.error = data
+            return
+
+        current_day = None
+        for i, day in enumerate(data['result']['signInLogs']):
+            if day['status'] == 'miss':
+                current_day = data['result']['signInLogs'][i - 1]
+                break
+
+        reward = (
+            '无奖励'
+            if not current_day['isReward']
+            else f'获得 {current_day["reward"]["name"]} {current_day["reward"]["description"]}'
+        )
+
+        self.signin_count = data['result']['signInCount']
+        self.signin_reward = reward
+
+        logging.info(f'[{self.phone}] 签到成功, 本月累计签到 {self.signin_count} 天.')
+        logging.info(f'[{self.phone}] 本次签到{reward}')
+
+    def __generate_result(self) -> dict:
+        """
+        获取签到结果
+
+        :return: 签到结果
+        """
+        user = self.phone or self.hide_refresh_token
+        text = (
+            f'[{user}] 签到成功, 本月累计签到 {self.signin_count} 天.\n本次签到{self.signin_reward}'
+            if self.signin_count
+            else f'[{user}] 签到失败\n{json.dumps(self.error, indent=2, ensure_ascii=False)}'
+        )
+
+        text_html = (
+            f'<code>{self.phone}</code> 签到成功, 本月累计签到 {self.signin_count} 天.\n本次签到{self.signin_reward}'
+            if self.signin_count
+            else (
+                f'<code>{self.phone}</code> 签到失败\n'
+                f'<code>{json.dumps(self.error, indent=2, ensure_ascii=False)}</code>'
+            )
+        )
+
+        return {
+            'success': True if self.signin_count else False,
+            'user': self.phone or self.hide_refresh_token,
+            'refresh_token': self.new_refresh_token or self.refresh_token,
+            'count': self.signin_count,
+            'reward': self.signin_reward,
+            'text': text,
+            'text_html': text_html,
         }
-    ).json()
 
-    try:
-        if data['code'] in [
-            'RefreshTokenExpired', 'InvalidParameter.RefreshToken',
-        ]:
-            logging.error(f'[{refresh_token}] 获取 access token 失败, 错误信息: {data}')
-            return False
-    except KeyError:
-        pass
+    def run(self) -> dict:
+        """
+        运行签到
 
-    expire_time = datetime.strptime(data['expire_time'], '%Y-%m-%dT%H:%M:%SZ')
+        :return: 签到结果
+        """
+        result = self.__get_access_token()
 
-    return {
-        'access_token': data['access_token'],
-        'refresh_token': data['refresh_token'],
-        'expired_at': int((mktime(expire_time.timetuple())) + 8 * 60 * 60) * 1000,
-        'phone': data['user_name'],
-    }
+        if result:
+            self.__sign_in()
 
-
-def sign_in(
-        config: ConfigObj | dict,
-        access_token: str,
-        phone: str
-) -> bool:
-    """
-    签到函数
-
-    :param config: 配置文件, ConfigObj 对象或字典
-    :param access_token: access_token
-    :param phone: 用户手机号
-    :return: 是否签到成功
-    """
-    data = requests.post(
-        'https://member.aliyundrive.com/v1/activity/sign_in_list',
-        headers={
-            'Authorization': f'Bearer {access_token}',
-        },
-        json={},
-    ).json()
-
-    if 'success' not in data:
-        logging.error(f'[{phone}] 签到失败, 错误信息: {data}')
-        push(config, data)
-        return False
-
-    current_day = None
-    for i, day in enumerate(data['result']['signInLogs']):
-        if day['status'] == 'miss':
-            current_day = data['result']['signInLogs'][i - 1]
-            break
-
-    reward = (
-        '无奖励'
-        if not current_day['isReward']
-        else f'获得 {current_day["reward"]["name"]} {current_day["reward"]["description"]}'
-    )
-    logging.info(f'[{phone}] 签到成功, 本月累计签到 {data["result"]["signInCount"]} 天.')
-    logging.info(f'[{phone}] 本次签到 {reward}')
-
-    push(config, phone, reward, data['result']['signInCount'])
-
-    return True
+        return self.__generate_result()
 
 
 def push(
         config: ConfigObj | dict,
-        phone: str,
-        signin_result: Optional[str] = None,
-        signin_count: Optional[int] = None,
+        content: str,
+        content_html: str,
+        title: Optional[str] = None,
 ) -> NoReturn:
     """
     推送签到结果
 
     :param config: 配置文件, ConfigObj 对象或字典
-    :param phone: 用户手机号
-    :param signin_result: 签到结果
-    :param signin_count: 当月累计签到天数
+    :param content: 推送内容
+    :param content_html: 推送内容, HTML 格式
+    :param title: 推送标题
+
     :return:
     """
     configured_push_types = [
@@ -131,7 +202,7 @@ def push(
         'smtp': smtp,
     }.items():
         if push_type in configured_push_types:
-            pusher.push(phone, signin_result, signin_count, config)
+            pusher.push(config, content, content_html, title)
 
 
 def init_logger() -> NoReturn:
@@ -231,26 +302,23 @@ def main():
         else config['refresh_tokens']
     )
 
-    new_users = []
+    results = []
 
     for user in users:
-        # Access Token
-        data = get_access_token(user)
-        if not data:
-            logging.error(f'[{user}] 获取 access token 失败.')
-            new_users.append(user)
-            continue
+        result = SignIn(config=config, refresh_token=user).run()
+        results.append(result)
 
-        new_users.append(data['refresh_token'])
+    # 合并推送
+    text = '\n\n'.join([i['text'] for i in results])
+    text_html = '\n\n'.join([i['text_html'] for i in results])
 
-        # 签到
-        if not sign_in(config, data['access_token'], data['phone']):
-            logging.error(f'[{data["phone"]}] 签到失败.')
-            continue
+    push(config, text, text_html, '阿里云盘签到')
 
     # 更新 refresh token
+    new_users = [i['refresh_token'] for i in results]
+
     if not by_action:
-        config['refresh_tokens'] = new_users
+        config['refresh_tokens'] = ','.join(new_users)
     else:
         github.update_secret('REFRESH_TOKENS', ','.join(new_users))
 
