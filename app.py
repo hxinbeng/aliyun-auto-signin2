@@ -136,10 +136,10 @@ class SignIn:
         )
 
         text_html = (
-            f'<code>{self.phone}</code> 签到成功, 本月累计签到 {self.signin_count} 天.\n本次签到{self.signin_reward}'
+            f'<code>{user}</code> 签到成功, 本月累计签到 {self.signin_count} 天.\n本次签到{self.signin_reward}'
             if self.signin_count
             else (
-                f'<code>{self.phone}</code> 签到失败\n'
+                f'<code>{user}</code> 签到失败\n'
                 f'<code>{json.dumps(self.error, indent=2, ensure_ascii=False)}</code>'
             )
         )
