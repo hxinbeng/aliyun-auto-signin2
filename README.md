@@ -37,7 +37,7 @@
     1. `Python >= 3.10`
     2. 安装依赖
         ```bash
-        pip install configobj requests
+        pip install -r requirements.txt
         ```
 3. 修改配置文件
     1. 复制 `example.config.ini` 为 `config.ini`
