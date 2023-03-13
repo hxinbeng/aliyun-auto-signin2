@@ -15,10 +15,17 @@
 
 ## 准备工作
 
-1. 创建一个新的公开或隐私仓库, 如 `aliyun-signin-action`
-   > 不需要 Fork 本仓库, 采用 `uses` 的方式引用本仓库 Action, 实现自动更新
+1. 创建一个新的公开 (推荐) 或私人仓库, 如 `aliyun-signin-action`
+   > 推荐使用公开仓库, 按照 GitHub [计费说明](https://github.com/settings/billing/plans), 公开仓库的 Actions 不计入使用时间
+
+   > 不需要 Fork 本仓库, 采用 `uses` 的方式引用本仓库 Action, 实现自动更新*
+
 2. 在仓库中新建文件 `.github/workflows/signin.yml`
    > 用于配置 Github Action 的工作流
+
+*自动更新指的是自动使用主仓库最新发行版本代码运行, 但无法修改 action 配置文件. 涉及更新传入参数等配置的更新,
+仍需手动操作 (如 [v1.3.4](https://github.com/ImYrS/aliyun-auto-signin/releases/tag/v1.3.4) 更新).  
+如未及时更新 action 配置, 不会影响已存在的功能, 但可能会导致新功能无法使用.
 
 ## 编写 Action 配置
 
@@ -53,10 +60,10 @@
               SMTP_SENDER: ${{ secrets.SMTP_SENDER }}
               SMTP_RECEIVER: ${{ secrets.SMTP_RECEIVER }}
     ```
+
 2. 按需填写上方配置中的 PUSH_TYPES 参数, 以启用推送功能. 使用 `telegram` 和 `smtp` 渠道在 Action 中可能获得更好体验.
    > 由于配置复杂或渠道 IP 限制等原因, 部分渠道不支持在 Github Action 中使用,
    详见项目首页的[推送渠道](https://github.com/ImYrS/aliyun-auto-signin/blob/main/README.md#%E6%8E%A8%E9%80%81%E6%B8%A0%E9%81%93)
-
 
 ## 配置 GitHub Secrets
 
@@ -66,10 +73,11 @@
 - `REFRESH_TOKENS` **[必选]** *阿里云盘 refresh token, 多账户使用英文逗号 (,) 分隔*
 - `GP_TOKEN` [推荐] 在 Action 中运行时更新 refresh token
 
-> **获取 GP_TOKEN 的方法**  
-> 
-> 点击 GitHub 头像 -> `Settings` (注意与配置 Secrets 不是同一个 Settings) -> `Developer settings` -> `Personal access token` -> `Tokens(classic)` -> `Generate new token`  
-> 
+> **获取 GP_TOKEN 的方法**
+>
+> 点击 GitHub 头像 -> `Settings` (注意与配置 Secrets 不是同一个
+> Settings) -> `Developer settings` -> `Personal access token` -> `Tokens(classic)` -> `Generate new token`
+>
 > 权限选择 `repo`, 不然不能更新 Secrets. 记住生成的 token, 离开页面后无法查看
 
 - `SERVERCHAN_SEND_KEY` [可选] *Server酱推送渠道的 SendKey*
@@ -105,7 +113,8 @@
 
 当前 Action Workflow 尚未经过完全验证, 已知存在或可能存在以下问题.
 
-- ~~无法自动更新 refresh token, 可能存在运行数天后鉴权失败的情况, 需要手动更新.~~ 由 [@fuwt](https://github.com/fuwt) 提供解决方案
+- ~~无法自动更新 refresh token, 可能存在运行数天后鉴权失败的情况, 需要手动更新.~~ 由 [@fuwt](https://github.com/fuwt)
+  提供解决方案
 - 不配置推送渠道且代码未报错情况下无法直观检查签到结果, 只能进入 workflow 日志查看.
 
 **如果你有更好或其他解决方案, 欢迎 PR**
